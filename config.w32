@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("p7zip", "for p7zip support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("p7zip", "enable p7zip support", "no");
+
+if (PHP_P7ZIP != "no") {
+	EXTENSION("p7zip", "p7zip.c", PHP_EXTNAME_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+}
+
