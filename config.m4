@@ -1,21 +1,19 @@
 dnl $Id$
 dnl config.m4 for extension p7zip
 
-dnl Comments in this file start with the string 'dnl'.
-dnl Remove where necessary. This file will not work
-dnl without editing.
+PHP_ARG_ENABLE(p7zip, whether to enable p7zip support,
+[  --enable-p7zip           Enable p7zip support])
 
-dnl If your extension references something external, use with:
-
-dnl PHP_ARG_WITH(p7zip, for p7zip support,
-dnl Make sure that the comment is aligned:
-dnl [  --with-p7zip             Include p7zip support])
-
-dnl Otherwise use enable:
-
-dnl PHP_ARG_ENABLE(p7zip, whether to enable p7zip support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-p7zip           Enable p7zip support])
+7zip_sources="  lzma-sdk/C/7zAlloc.c lzma-sdk/C/7zArcIn.c\
+                lzma-sdk/C/7zBuf.c lzma-sdk/C/7zBuf2.c\
+                lzma-sdk/C/7zCrc.c lzma-sdk/C/7zCrcOpt.c\
+                lzma-sdk/C/7zDec.c lzma-sdk/C/CpuArch.c\
+                lzma-sdk/C/Delta.c lzma-sdk/C/LzmaDec.c\
+                lzma-sdk/C/Lzma2Dec.c lzma-sdk/C/Bra.c\
+                lzma-sdk/C/Bra86.c lzma-sdk/C/BraIA64.c\
+                lzma-sdk/C/Bcj2.c lzma-sdk/C/Ppmd7.c\
+                lzma-sdk/C/Ppmd7Dec.c lzma-sdk/C/7zFile.c\
+                lzma-sdk/C/7zStream.c"
 
 if test "$PHP_P7ZIP" != "no"; then
   dnl Write more examples of tests here...
@@ -58,6 +56,7 @@ if test "$PHP_P7ZIP" != "no"; then
   dnl ])
   dnl
   dnl PHP_SUBST(P7ZIP_SHARED_LIBADD)
+  
 
-  PHP_NEW_EXTENSION(p7zip, p7zip.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(p7zip, p7zip.c $7zip_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
