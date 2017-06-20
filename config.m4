@@ -4,7 +4,7 @@ dnl config.m4 for extension p7zip
 PHP_ARG_ENABLE(p7zip, whether to enable p7zip support,
 [  --enable-p7zip           Enable p7zip support])
 
-7zip_sources="  lzma-sdk/C/7zAlloc.c lzma-sdk/C/7zArcIn.c\
+p7zip_sources="  lzma-sdk/C/7zAlloc.c lzma-sdk/C/7zArcIn.c\
                 lzma-sdk/C/7zBuf.c lzma-sdk/C/7zBuf2.c\
                 lzma-sdk/C/7zCrc.c lzma-sdk/C/7zCrcOpt.c\
                 lzma-sdk/C/7zDec.c lzma-sdk/C/CpuArch.c\
@@ -58,5 +58,5 @@ if test "$PHP_P7ZIP" != "no"; then
   dnl PHP_SUBST(P7ZIP_SHARED_LIBADD)
   
 
-  PHP_NEW_EXTENSION(p7zip, p7zip.c $7zip_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(p7zip, p7zip.c $p7zip_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 fi
