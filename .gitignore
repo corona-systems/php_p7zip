@@ -48,3 +48,4 @@ Doxyfile
 *.kdevses
 .*kate-swp
 build/
+*.kdev4
