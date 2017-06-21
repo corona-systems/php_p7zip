@@ -130,12 +130,7 @@ PHP_FUNCTION(p7zip_open){
     res = SzArEx_Open(&file->db, &file->lookStream.s, &file->allocImp, &file->allocTempImp);
     
     if(res != SZ_OK){
-        if (res == SZ_ERROR_UNSUPPORTED)
-            php_error_docref(NULL, E_ERROR, "Decoder doesn't support this archive");
-        else if (res == SZ_ERROR_MEM)
-            php_error_docref(NULL, E_ERROR, "Can not allocate memory");
-        else if (res == SZ_ERROR_CRC)
-            php_error_docref(NULL, E_ERROR, "CRC error");
+        php_error_docref(NULL, E_ERROR, "Can't open archive");
         SzArEx_Free(&file->db, &file->allocImp);
         File_Close(&file->archiveStream.file);
         efree(file);
