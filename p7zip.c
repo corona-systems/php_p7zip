@@ -178,8 +178,12 @@ PHP_FUNCTION(p7zip_test){
     SRes res;
     size_t offset = 0;
     size_t outSizeProcessed = 0;
+    unsigned isDir;
     
     for (i = 0; i < file->db.NumFiles; i++){
+        isDir = SzArEx_IsDir(&file->db, i);
+        if(isDir)
+            continue;
         res = SzArEx_Extract(&file->db, &file->lookStream.s, i,
               &blockIndex, &outBuffer, &outBufferSize,
               &offset, &outSizeProcessed,
