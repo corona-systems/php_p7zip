@@ -35,7 +35,7 @@ ZEND_DECLARE_MODULE_GLOBALS(p7zip)
 
 /* True global resources - no need for thread safety here */
 static int le_p7zip;
-#define le_p7zip_descriptor_name "7Zip File Descriptor"
+#define le_p7zip_name "7Zip File Descriptor"
 
 /* {{{ PHP_INI
  */
@@ -147,10 +147,12 @@ PHP_FUNCTION(p7zip_close){
     p7zip_file_t* file;
     
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
+        php_error_docref(NULL, E_ERROR, "Should not happen");
         return;
     }
 
-    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_descriptor_name, le_p7zip)) == NULL) {
+    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+        php_error_docref(NULL, E_ERROR, "Should not happen either");
         RETURN_FALSE;
     }
     
@@ -166,7 +168,7 @@ PHP_MINIT_FUNCTION(p7zip)
 	REGISTER_INI_ENTRIES();
 	*/
         
-        le_p7zip = zend_register_list_destructors_ex(p7zip_free, NULL, le_p7zip_descriptor_name, module_number);
+        le_p7zip = zend_register_list_destructors_ex(p7zip_free, NULL, le_p7zip_name, module_number);
         
         CrcGenerateTable();
         
