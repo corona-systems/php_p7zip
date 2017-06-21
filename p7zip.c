@@ -47,35 +47,6 @@ PHP_INI_END()
 */
 /* }}} */
 
-/* Remove the following function when you have successfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_p7zip_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_p7zip_compiled)
-{
-	char *arg = NULL;
-	size_t arg_len, len;
-	zend_string *strg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	strg = strpprintf(0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "p7zip", arg);
-
-	RETURN_STR(strg);
-}
-/* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and
-   unfold functions in source code. See the corresponding marks just before
-   function definition, where the functions purpose is also documented. Please
-   follow this convention for the convenience of others editing your code.
-*/
-
-
 /* {{{ php_p7zip_init_globals
  */
 /* Uncomment this function if you have INI entries
@@ -109,7 +80,7 @@ static void p7zip_free(zend_resource* rsrc){
     rsrc->ptr = NULL;
 }
 
-/* {{{ proto resource p7zip_open(string filename)
+/* {{{ proto Resource p7zip_open(string filename)
    Opens a 7zip file */
 
 PHP_FUNCTION(p7zip_open){
@@ -249,14 +220,21 @@ PHP_MINFO_FUNCTION(p7zip)
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_open, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_close, 0, 0, 1)
+	ZEND_ARG_INFO(0, zip)
+ZEND_END_ARG_INFO()
+
 /* {{{ p7zip_functions[]
  *
  * Every user visible function must have an entry in p7zip_functions[].
  */
 const zend_function_entry p7zip_functions[] = {
-	PHP_FE(confirm_p7zip_compiled,	NULL)		/* For testing, remove later. */
-        PHP_FE(p7zip_open, NULL)
-        PHP_FE(p7zip_close, NULL)
+        PHP_FE(p7zip_open, arginfo_p7zip_open)
+        PHP_FE(p7zip_close, arginfo_p7zip_close)
 	PHP_FE_END	/* Must be the last line in p7zip_functions[] */
 };
 /* }}} */
