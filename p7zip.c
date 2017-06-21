@@ -114,7 +114,6 @@ PHP_FUNCTION(p7zip_open){
     file->allocTempImp.Free = SzFree;
     
     if (InFile_Open(&file->archiveStream.file, resolved_path)){
-        php_error_docref(NULL, E_ERROR, "Can't open file %s", resolved_path);
         efree(file);
         RETURN_FALSE;
     }
