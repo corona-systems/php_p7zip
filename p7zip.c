@@ -165,18 +165,6 @@ PHP_FUNCTION(p7zip_close){
 }
 /* }}} */
 
-PHP_FUNCTION(p7zip_close){
-    zval* val;
-    p7zip_file_t* file;
-    
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
-        return;
-    }
-
-    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
-        RETURN_FALSE;
-    }
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(p7zip)
