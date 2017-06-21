@@ -88,7 +88,6 @@ PHP_FUNCTION(p7zip_open){
     char resolved_path[MAXPATHLEN + 1];
     p7zip_file_t* file;
     SRes res;
-    WRes wres;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
         return;
     }
@@ -114,8 +113,8 @@ PHP_FUNCTION(p7zip_open){
     file->allocTempImp.Alloc = SzAlloc;
     file->allocTempImp.Free = SzFree;
     
-    if ((wres = InFile_Open(&file->archiveStream.file, resolved_path))){
-        php_error_docref(NULL, E_ERROR, "Can't open file %s %d", resolved_path, wres);
+    if (InFile_Open(&file->archiveStream.file, resolved_path)){
+        php_error_docref(NULL, E_ERROR, "Can't open file %s", resolved_path);
         efree(file);
         RETURN_FALSE;
     }
@@ -131,7 +130,12 @@ PHP_FUNCTION(p7zip_open){
     res = SzArEx_Open(&file->db, &file->lookStream.s, &file->allocImp, &file->allocTempImp);
     
     if(res != SZ_OK){
-        php_error_docref(NULL, E_ERROR, "Can't create 7zip database");
+        if (res == SZ_ERROR_UNSUPPORTED)
+            php_error_docref(NULL, E_ERROR, "Decoder doesn't support this archive");
+        else if (res == SZ_ERROR_MEM)
+            php_error_docref(NULL, E_ERROR, "Can not allocate memory");
+        else if (res == SZ_ERROR_CRC)
+            php_error_docref(NULL, E_ERROR, "CRC error");
         SzArEx_Free(&file->db, &file->allocImp);
         File_Close(&file->archiveStream.file);
         efree(file);
@@ -160,6 +164,18 @@ PHP_FUNCTION(p7zip_close){
     zend_list_close(Z_RES_P(val));
 }
 /* }}} */
+
+PHP_FUNCTION(p7zip_close){
+    zval* val;
+    p7zip_file_t* file;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
+        return;
+    }
+
+    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+        RETURN_FALSE;
+    }
 
 /* {{{ PHP_MINIT_FUNCTION
  */
