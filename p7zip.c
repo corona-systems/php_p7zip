@@ -88,7 +88,7 @@ PHP_FUNCTION(p7zip_open){
     char resolved_path[MAXPATHLEN + 1];
     p7zip_file_t* file;
     SRes res;
-    
+    WRes wres
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
         return;
     }
@@ -114,8 +114,8 @@ PHP_FUNCTION(p7zip_open){
     file->allocTempImp.Alloc = SzAlloc;
     file->allocTempImp.Free = SzFree;
     
-    if (InFile_Open(&file->archiveStream.file, resolved_path)){
-        php_error_docref(NULL, E_ERROR, "Can't open file %s", resolved_path);
+    if ((wres = InFile_Open(&file->archiveStream.file, resolved_path))){
+        php_error_docref(NULL, E_ERROR, "Can't open file %s %d", resolved_path, wres);
         efree(file);
         RETURN_FALSE;
     }
