@@ -6,7 +6,7 @@ p7zip_test() function
 <?php
 $handle = p7zip_open(dirname(__FILE__)."/test_corrupted.7z");
 $error = p7zip_test($handle);
-if($error == SZ_CRC) ? "OK" : "Failure"
+$error == SZ_CRC ? "OK" : "Failure"
 p7zip_close($handle);
 ?>
 --EXPECT--
