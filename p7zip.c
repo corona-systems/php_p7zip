@@ -151,7 +151,7 @@ PHP_FUNCTION(p7zip_close){
         return;
     }
 
-    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+    if ((file = (p7zip_file_t*) zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
         RETURN_FALSE;
     }
     
@@ -167,7 +167,7 @@ PHP_FUNCTION(p7zip_test){
         return;
     }
 
-    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+    if ((file = (p7zip_file_t*) zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
         RETURN_FALSE;
     }
     
@@ -187,6 +187,8 @@ PHP_FUNCTION(p7zip_test){
         if (res != SZ_OK)
             break;
     }
+    
+    IAlloc_Free(&file->allocImp, outBuffer);
     
     if(res != SZ_OK)
         RETURN_LONG(res);
