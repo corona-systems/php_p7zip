@@ -142,6 +142,9 @@ PHP_FUNCTION(p7zip_open){
 }
 /* }}} */
 
+/* {{{ proto void p7zip_close(Resource zip)
+   Closes a 7zip file */
+
 PHP_FUNCTION(p7zip_close){
     zval* val;
     p7zip_file_t* file;
@@ -156,7 +159,7 @@ PHP_FUNCTION(p7zip_close){
     
     zend_list_close(Z_RES_P(val));
 }
-
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
