@@ -147,12 +147,10 @@ PHP_FUNCTION(p7zip_close){
     p7zip_file_t* file;
     
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
-        php_error_docref(NULL, E_ERROR, "Should not happen");
         return;
     }
 
     if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
-        php_error_docref(NULL, E_ERROR, "Should not happen either");
         RETURN_FALSE;
     }
     
