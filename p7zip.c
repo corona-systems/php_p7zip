@@ -280,6 +280,7 @@ ZEND_END_ARG_INFO()
 const zend_function_entry p7zip_functions[] = {
         PHP_FE(p7zip_open, arginfo_p7zip_open)
         PHP_FE(p7zip_close, arginfo_p7zip_close)
+        PHP_FE(p7zip_test, arginfo_p7zip_test)
 	PHP_FE_END	/* Must be the last line in p7zip_functions[] */
 };
 /* }}} */
