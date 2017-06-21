@@ -16,7 +16,7 @@ $zip = p7zip_open(dirname(__FILE__)."/test_corrupted.7z");
 ?>
 --EXPECTF--
 Test case 1:
-Invalid filename length
+Invalid filename length in %s on line %d
 Test case 2:
 Warning: p7zip_open() expects exactly 1 parameter, 2 given in %s on line %d
 Test case 3:
