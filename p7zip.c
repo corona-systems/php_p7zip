@@ -127,7 +127,7 @@ PHP_FUNCTION(p7zip_open){
         RETURN_FALSE;
     }
     
-    if(php_check_open_basedir(ZSTR_VAL(filename)){
+    if(php_check_open_basedir(ZSTR_VAL(filename))){
         RETURN_FALSE;
     }
     
