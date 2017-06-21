@@ -138,7 +138,7 @@ PHP_FUNCTION(p7zip_open){
         RETURN_FALSE;
     }
     
-    RETURN_RES(zend_register_resource(file, le_p7zip));
+    RETURN_RES(zend_register_resource(file, le_p7zip_descriptor));
 }
 /* }}} */
 
