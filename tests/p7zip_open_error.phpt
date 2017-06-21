@@ -8,7 +8,7 @@ echo "Test case 1:";
 $zip = p7zip_open("");
 echo "Test case 2:";
 $zip = p7zip_open("foo", "bar");
-echo "Test case 3:";
+echo "Test case 3:\n";
 $zip = p7zip_open("nonexisting.7z");
 echo is_resource($zip) ? "OK" : "Failure";
 ?>
@@ -19,4 +19,3 @@ Test case 2:
 Warning: p7zip_open() expects exactly 1 parameter, 2 given in %s on line %d
 Test case 3:
 Fatal error: p7zip_open(): Can't open file %s on line %d
-Failure
