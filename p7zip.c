@@ -27,12 +27,15 @@
 #include "ext/standard/info.h"
 #include "php_p7zip.h"
 
+#include "lzma-sdk/C/7zCrc.h"
+
 /* If you declare any globals in php_p7zip.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(p7zip)
 */
 
 /* True global resources - no need for thread safety here */
 static int le_p7zip;
+#define le_p7zip_descriptor_name "7Zip File Descriptor"
 
 /* {{{ PHP_INI
  */
@@ -84,6 +87,106 @@ static void php_p7zip_init_globals(zend_p7zip_globals *p7zip_globals)
 */
 /* }}} */
 
+static int le_p7zip_descriptor;
+
+static void* SzAlloc(void *p, size_t size){
+    return emalloc(size);
+}
+
+static void SzFree(void *p, void *address){
+  efree(address);
+}
+
+static void p7zip_free(zend_resource* rsrc){
+    p7zip_file_t* file = (p7zip_file_t*) rsrc->ptr;
+    
+    if(file){
+        SzArEx_Free(&file->db, &file->allocImp);
+        File_Close(&file->archiveStream.file);
+        efree(rsrc->ptr);
+    }
+    
+    rsrc->ptr = NULL;
+}
+
+/* {{{ proto resource p7zip_open(string filename)
+   Opens a 7zip file */
+
+PHP_FUNCTION(p7zip_open){
+    zend_string* filename;
+    char resolved_path[MAXPATHLEN + 1];
+    p7zip_file_t* file;
+    SRes res;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+        return;
+    }
+    
+    if(ZSTR_LEN(filename) == 0){
+        php_error_docref(NULL, E_WARNING, "Invalid filename length");
+        RETURN_FALSE;
+    }
+    
+    if(php_check_open_basedir(ZSTR_VAL(filename)){
+        RETURN_FALSE;
+    }
+    
+    if(!expand_filepath(ZSTR_VAL(filename), resolved_path)) {
+        RETURN_FALSE;
+    }
+        
+    file = (p7zip_file_t*) emalloc(sizeof(p7zip_file_t));
+    
+    file->allocImp.Alloc = SzAlloc;
+    file->allocImp.Free = SzFree;
+
+    file->allocTempImp.Alloc = SzAlloc;
+    file->allocTempImp.Free = SzFree;
+    
+    if (InFile_Open(&file->archiveStream.file, filename)){
+        php_error_docref(NULL, E_ERROR, "Can't open file %s", resolved_path);
+        efree(file);
+        RETURN_FALSE;
+    }
+    
+    FileInStream_CreateVTable(&file->archiveStream);
+    LookToRead_CreateVTable(&file->lookStream, False);
+  
+    file->lookStream.realStream = &file->archiveStream.s;
+    LookToRead_Init(&file->lookStream);
+    
+    SzArEx_Init(&file->db);
+  
+    res = SzArEx_Open(&file->db, &file->lookStream.s, &file->allocImp, &file->allocTempImp);
+    
+    if(res != SZ_OK){
+        php_error_docref(NULL, E_ERROR, "Can't create 7zip database");
+        SzArEx_Free(&file->db, &file->allocImp);
+        File_Close(&file->archiveStream.file);
+        efree(file);
+        RETURN_FALSE;
+    }
+    
+    RETURN_RES(zend_register_resource(file, le_p7zip_descriptor));
+}
+/* }}} */
+
+PHP_FUNCTION(p7zip_close){
+    zval* val;
+    p7zip_file_t* file;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
+        return;
+    }
+
+    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_descriptor_name, le_p7zip_descriptor)) == NULL) {
+        RETURN_FALSE;
+    }
+    
+    p7zip_free(Z_RES_P(val));
+}
+
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(p7zip)
@@ -91,6 +194,11 @@ PHP_MINIT_FUNCTION(p7zip)
 	/* If you have INI entries, uncomment these lines
 	REGISTER_INI_ENTRIES();
 	*/
+        
+        le_p7zip = zend_register_list_destructors_ex(p7zip_free, NULL, le_p7zip_descriptor_name, module_number);
+        
+        CrcGenerateTable();
+        
 	return SUCCESS;
 }
 /* }}} */
@@ -147,6 +255,8 @@ PHP_MINFO_FUNCTION(p7zip)
  */
 const zend_function_entry p7zip_functions[] = {
 	PHP_FE(confirm_p7zip_compiled,	NULL)		/* For testing, remove later. */
+        PHP_FE(p7zip_open, NULL)
+        PHP_FE(p7zip_close, NULL)
 	PHP_FE_END	/* Must be the last line in p7zip_functions[] */
 };
 /* }}} */

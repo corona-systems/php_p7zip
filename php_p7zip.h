@@ -38,6 +38,9 @@ extern zend_module_entry p7zip_module_entry;
 #include "TSRM.h"
 #endif
 
+#include "lzma-sdk/C/7z.h"
+#include "lzma-sdk/C/7zFile.h"
+
 /*
   	Declare any global variables you may need between the BEGIN
 	and END macros here:
@@ -52,11 +55,20 @@ ZEND_END_MODULE_GLOBALS(p7zip)
    You are encouraged to rename these macros something shorter, see
    examples in any other php module directory.
 */
+
 #define P7ZIP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(p7zip, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_P7ZIP)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
+
+typedef struct _p7zip_file_s{
+    CSzArEx db;
+    CFileInStream archiveStream;
+    CLookToRead lookStream;
+    ISzAlloc allocImp;
+    ISzAlloc allocTempImp;
+} p7zip_file_t;
 
 #endif	/* PHP_P7ZIP_H */
 
