@@ -6,6 +6,7 @@ p7zip_test() function
 <?php
 $handle = p7zip_open(dirname(__FILE__)."/test.7z");
 echo p7zip_test($handle) ? "OK" : "Failure";
+p7zip_close($handle);
 ?>
 --EXPECT--
 OK
