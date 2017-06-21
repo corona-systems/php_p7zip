@@ -58,7 +58,7 @@ static void php_p7zip_init_globals(zend_p7zip_globals *p7zip_globals)
 */
 /* }}} */
 
-static int le_p7zip_descriptor;
+//static int le_p7zip_descriptor;
 
 static void* SzAlloc(void *p, size_t size){
     return emalloc(size);
@@ -150,7 +150,7 @@ PHP_FUNCTION(p7zip_close){
         return;
     }
 
-    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_descriptor_name, le_p7zip_descriptor)) == NULL) {
+    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_descriptor_name, le_p7zip)) == NULL) {
         RETURN_FALSE;
     }
     
