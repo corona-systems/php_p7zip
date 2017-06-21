@@ -154,7 +154,7 @@ PHP_FUNCTION(p7zip_close){
         RETURN_FALSE;
     }
     
-    p7zip_free(Z_RES_P(val));
+    zend_list_close(Z_RES_P(val));
 }
 
 
