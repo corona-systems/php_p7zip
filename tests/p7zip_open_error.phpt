@@ -5,12 +5,12 @@ p7zip_open() function
 --FILE--
 <?php
 echo "Test case 1:";
-$zip = p7zip_open("");
+$handle = p7zip_open("");
 echo "Test case 2:";
-$zip = p7zip_open("foo", "bar");
+$handle = p7zip_open("foo", "bar");
 echo "Test case 3:\n";
-$zip = p7zip_open("nonexisting.7z");
-echo is_resource($zip) ? "OK" : "Failure";
+$handle = p7zip_open("nonexisting.7z");
+echo is_resource($handle) ? "OK" : "Failure";
 ?>
 --EXPECTF--
 Test case 1:

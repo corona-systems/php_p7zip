@@ -4,10 +4,10 @@ p7zip_close() function
 <?php if (!extension_loaded("p7zip")) print "skip"; ?>
 --FILE--
 <?php
-$zip = p7zip_open(dirname(__FILE__)."/test.7z");
-if(!is_resource($zip))
+$handle = p7zip_open(dirname(__FILE__)."/test.7z");
+if(!is_resource($handle))
     die("Failure");
-p7zip_close($zip);
+p7zip_close($handle);
 echo "OK";
 ?>
 --EXPECT--

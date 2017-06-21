@@ -159,6 +159,42 @@ PHP_FUNCTION(p7zip_close){
 }
 /* }}} */
 
+PHP_FUNCTION(p7zip_test){
+    zval* val;
+    p7zip_file_t* file;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &val) == FAILURE) {
+        return;
+    }
+
+    if ((file = (p7zip_file_t*)zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+        RETURN_FALSE;
+    }
+    
+    UInt32 blockIndex = 0xFFFFFFFF;
+    Byte *outBuffer = 0;
+    size_t outBufferSize = 0;
+    UInt32 i;
+    SRes res;
+    size_t offset = 0;
+    size_t outSizeProcessed = 0;
+    
+    for (i = 0; i < file->db.NumFiles; i++){
+        res = SzArEx_Extract(&file->db, &file->lookStream.s, i,
+              &blockIndex, &outBuffer, &outBufferSize,
+              &offset, &outSizeProcessed,
+              &file->allocImp, &file->allocTempImp);
+        if (res != SZ_OK)
+            break;
+    }
+    
+    if(res != SZ_OK)
+        RETURN_LONG(res);
+    
+    RETURN_TRUE;
+    
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(p7zip)
@@ -168,6 +204,10 @@ PHP_MINIT_FUNCTION(p7zip)
 	*/
         
         le_p7zip = zend_register_list_destructors_ex(p7zip_free, NULL, le_p7zip_name, module_number);
+        
+        REGISTER_LONG_CONSTANT("SZ_OK", SZ_OK, CONST_CS | CONST_PERSISTENT);
+        REGISTER_LONG_CONSTANT("SZ_ERROR_UNSUPPORTED", SZ_ERROR_UNSUPPORTED, CONST_CS | CONST_PERSISTENT);
+        REGISTER_LONG_CONSTANT("SZ_ERROR_CRC", SZ_ERROR_CRC, CONST_CS | CONST_PERSISTENT);
         
         CrcGenerateTable();
         
@@ -226,7 +266,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_open, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_close, 0, 0, 1)
-	ZEND_ARG_INFO(0, zip)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_test, 0, 0, 1)
+	ZEND_ARG_INFO(0, handle)
 ZEND_END_ARG_INFO()
 
 /* {{{ p7zip_functions[]
