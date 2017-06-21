@@ -88,7 +88,7 @@ PHP_FUNCTION(p7zip_open){
     char resolved_path[MAXPATHLEN + 1];
     p7zip_file_t* file;
     SRes res;
-    WRes wres
+    WRes wres;
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
         return;
     }
