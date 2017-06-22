@@ -517,10 +517,7 @@ PHP_FUNCTION(p7zip_list){
     size_t tempSize = 0;
     
     HashTable* ht;
-    if(full_info)
-        zend_init_hashtable(ht, file->db.NumFiles, NULL, NULL, 0);
-    else
-        array_init(return_value, file->db.NumFiles);
+    zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
     
     for (i = 0; i < file->db.NumFiles; i++){
         smart_string filename = {0};
@@ -548,7 +545,7 @@ PHP_FUNCTION(p7zip_list){
         if(isDir)
             smart_str_appendl(&filename, "/", sizeof("/") - 1);
         
-        if(add_next_index_string(return_value, filename.s, 1) == FAILURE){
+        if(zend_hash_index_add(ht, i, filename.s) == FAILURE){
             RETURN_FALSE;
         }
     }
