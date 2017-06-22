@@ -1,5 +1,5 @@
 --TEST--
-p7zip_test() function
+p7zip_list() function
 --SKIPIF--
 <?php if (!extension_loaded("p7zip")) print "skip"; ?>
 --FILE--
