@@ -25,6 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
+
 #include "php_p7zip.h"
 
 #include "lzma-sdk/C/7zCrc.h"
@@ -500,7 +502,7 @@ PHP_FUNCTION(p7zip_list){
     p7zip_file_t* file;
     zend_bool full_info = 0;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &zend_bool) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &full_info) == FAILURE) {
         return;
     }
 
