@@ -26,7 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_hash.h"
-#include "Zend/zend_smart_string.h"
+#include "Zend/zend_smart_str.h"
 
 #include "php_p7zip.h"
 
@@ -520,7 +520,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
     
     for (i = 0; i < file->db.NumFiles; i++){
-        smart_string filename = {0};
+        smart_str filename = {0};
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -540,10 +540,10 @@ PHP_FUNCTION(p7zip_list){
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
         
-        smart_string_appendl(&filename,(const char*) &temp, len);
+        smart_str_appendl(&filename,(const char*) &temp, len);
         
         if(isDir)
-            smart_string_appendl(&filename, "/", sizeof("/") - 1);
+            smart_str_appendl(&filename, "/", sizeof("/") - 1);
         
         if(zend_hash_index_add(ht, i, filename.s) == FAILURE){
             RETURN_FALSE;
