@@ -550,7 +550,7 @@ PHP_FUNCTION(p7zip_list){
         }
     }
     
-    IAlloc_Free(&file->allocImp, outBuffer);
+    SzFree(NULL, temp);
     
     if(res != SZ_OK)
         RETURN_LONG(res);
