@@ -548,7 +548,7 @@ PHP_FUNCTION(p7zip_list){
         if(isDir)
             smart_str_appendl(&filename, "/", sizeof("/") - 1);
         
-        if(zend_hash_index_add(ht, i, filename.s) == FAILURE){
+        if(zend_hash_index_add_new(ht, i, filename.s) == FAILURE){
             RETURN_FALSE;
         }
     }
