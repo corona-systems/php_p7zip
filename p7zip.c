@@ -540,10 +540,10 @@ PHP_FUNCTION(p7zip_list){
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
         
-        smart_str_appendl(&filename, temp, len);
+        smart_string_appendl(&filename,(const char*) &temp, len);
         
         if(isDir)
-            smart_str_appendl(&filename, "/", sizeof("/") - 1);
+            smart_string_appendl(&filename, "/", sizeof("/") - 1);
         
         if(zend_hash_index_add(ht, i, filename.s) == FAILURE){
             RETURN_FALSE;
