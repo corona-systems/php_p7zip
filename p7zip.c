@@ -26,7 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_hash.h"
-#include "Zend/zend_smart_str.h"
+#include "Zend/zend_smart_string.h"
 
 #include "php_p7zip.h"
 
