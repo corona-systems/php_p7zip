@@ -512,7 +512,7 @@ PHP_FUNCTION(p7zip_list){
     }
     
     UInt32 i;
-    SRes res;
+    SRes res = SZ_OK;
     UInt16 *temp = NULL;
     size_t tempSize = 0;
     
