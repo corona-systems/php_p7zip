@@ -5,7 +5,7 @@ p7zip_list() function
 --FILE--
 <?php
 $handle = p7zip_open(dirname(__FILE__)."/test.7z");
-var_dump(p7zip_test($handle));
+var_dump(p7zip_list($handle));
 p7zip_close($handle);
 ?>
 --EXPECT--
