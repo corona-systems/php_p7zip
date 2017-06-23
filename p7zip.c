@@ -574,7 +574,7 @@ PHP_FUNCTION(p7zip_list){
         zval entry;
         ZVAL_STR(&entry, zend_string_init(ZEND_STRL(str), 0));
         
-        if(zend_hash_next_index_add_new(ht, i, &entry) == NULL){
+        if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             efree(str);
             RETURN_FALSE;
         }
