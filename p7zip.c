@@ -542,7 +542,7 @@ PHP_FUNCTION(p7zip_list){
     
     HashTable* ht;
     ALLOC_HASHTABLE(ht);
-    zend_hash_init(ht, file->db.NumFiles+1, NULL, NULL, 0);
+    zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
         zend_string* filename;
@@ -570,19 +570,14 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        zval entry, entry2;
+        zval entry;
         ZVAL_STR(&entry, filename);
-        ZVAL_STR(&entry2, zend_string_copy(filename));
+        
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
         }
-        
-        if(zend_hash_index_add_new(ht, i+1, &entry2) == NULL){
-            zend_string_release(filename);
-            RETURN_FALSE;
-        }
-        
+                
     }
     
     SzFree(NULL, temp);
