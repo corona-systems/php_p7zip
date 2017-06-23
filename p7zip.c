@@ -550,7 +550,7 @@ PHP_FUNCTION(p7zip_list){
         }
         
         zval entry;
-        ZVAL_STR(&entry, zend_string_copy(filename));
+        ZVAL_STR(&entry, filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
