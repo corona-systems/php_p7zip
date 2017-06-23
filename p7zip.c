@@ -271,7 +271,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #endif
 }
 
-static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
+/*static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -287,9 +287,9 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
-}
+}*/
 
-/*static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
+static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     size_t size;
@@ -308,7 +308,7 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
-}*/
+}
 
 static void UInt64ToStr(UInt64 value, char *s){
     char temp[32];
@@ -545,7 +545,8 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
-        zend_string* filename;
+        zend_string filename;
+        char* str;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -563,22 +564,22 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(&filename, temp, isDir);
+        res = ConvertString(&str, temp, isDir);
         
         if(res != SZ_OK){
-            zend_string_release(filename);
+            efree(str);
             break;
         }
         
         zval entry;
-        ZVAL_STR(&entry, filename);
+        ZVAL_STR(&entry, zend_string_init(ZEND_STRL(str), 0));
         
-        if(zend_hash_next_index_insert_new(ht, &entry) == NULL){
-            zend_string_release(filename);
+        if(zend_hash_next_index_add_new(ht, i, &entry) == NULL){
+            efree(str);
             RETURN_FALSE;
         }
         
-        zend_string_release(filename);
+        efree(str);
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
     
