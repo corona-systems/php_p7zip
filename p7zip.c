@@ -519,9 +519,9 @@ PHP_FUNCTION(p7zip_list){
     UInt16 *temp = NULL;
     size_t tempSize = 0;
     
-    /*HashTable* ht;
+    HashTable* ht;
     ALLOC_HASHTABLE(ht);
-    zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);*/
+    zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
     zend_string* filename;
     for (i = 0; i < file->db.NumFiles; i++){
         //zend_string* filename;
@@ -552,10 +552,10 @@ PHP_FUNCTION(p7zip_list){
         zval entry;
         ZVAL_STR(&entry, filename);
         
-        /*if(zend_hash_index_add_new(ht, i, &entry) == NULL){
+        if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
-        }*/
+        }
         
     }
     
@@ -563,8 +563,8 @@ PHP_FUNCTION(p7zip_list){
     
     if(res != SZ_OK)
         RETURN_LONG(res);
-    RETURN_STR(filename);
-    //ZVAL_ARR(return_value, ht);
+
+    ZVAL_ARR(return_value, ht);
     
 }
 
