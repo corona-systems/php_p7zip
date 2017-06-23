@@ -271,7 +271,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #endif
 }
 
-static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
+static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -281,9 +281,9 @@ static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? -1 : 0), 0);
+        *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? -1 : 0), 0);
         if(isDir)
-            str->val[buf.size - (size_t)2] = '/';
+            (*str)->val[buf.size - (size_t)2] = '/';
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
@@ -545,7 +545,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
-        zend_string filename;
+        zend_string* filename;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -566,7 +566,7 @@ PHP_FUNCTION(p7zip_list){
         res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
-            //zend_string_release(filename);
+            zend_string_release(filename);
             break;
         }
         
@@ -574,7 +574,7 @@ PHP_FUNCTION(p7zip_list){
         ZVAL_STR(&entry, &filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
-            //zend_string_release(filename);
+            zend_string_release(filename);
             RETURN_FALSE;
         }
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
@@ -585,7 +585,7 @@ PHP_FUNCTION(p7zip_list){
     if(res != SZ_OK)
         RETURN_LONG(res);
 
-    RETURN_ARR(ht);
+    RETURN_ARR(zend_array_dup(ht));
     
 }
 
