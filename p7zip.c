@@ -271,7 +271,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #endif
 }
 
-static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
+static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -281,9 +281,9 @@ static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        str = zend_string_init(buf.data, buf.size + (!isDir ? 0 : 1), 0);
+        *str = zend_string_init(buf.data, buf.size + (!isDir ? 0 : 1), 0);
         if(isDir)
-            str->val[buf.size - (size_t)2] = '/';
+            (*str)->val[buf.size - (size_t)2] = '/';
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
@@ -542,7 +542,7 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(filename, temp, isDir);
+        res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
             zend_string_release(filename);
