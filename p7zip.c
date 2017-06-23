@@ -281,7 +281,7 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? 1 : 2), 0);
+        *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? -1 : 0), 0);
         if(isDir)
             (*str)->val[buf.size - (size_t)2] = '/';
     }
@@ -550,13 +550,14 @@ PHP_FUNCTION(p7zip_list){
         }
         
         zval entry;
-        ZVAL_STR(&entry, filename);
+        ZVAL_STR_COPY(&entry, filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
         }
         
+        zend_string_release(filename);
     }
     
     SzFree(NULL, temp);
