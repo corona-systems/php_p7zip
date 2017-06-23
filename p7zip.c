@@ -542,7 +542,7 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        
+        php_printf("%u\n", len);
         res = ConvertString(filename, temp, isDir);
         
         PHPWRITE(ZSTR_VAL(filename), ZSTR_LEN(filename));
