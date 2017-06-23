@@ -257,7 +257,7 @@ static WRes MyCreateDir(const UInt16 *name){
     #endif
 }
 
-static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
+/*static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #ifdef USE_WINDOWS_FILE
     return OutFile_OpenW(p, name);
     #else
@@ -269,9 +269,9 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     Buf_Free(&buf, &g_Alloc);
     return res;
     #endif
-}
+}*/
 
-/*static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
+static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -287,7 +287,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
-}*/
+}
 
 static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
@@ -545,8 +545,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, ZVAL_PTR_DTOR, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
-        zend_string filename;
-        char* str;
+        zend_string* filename;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -564,23 +563,21 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(&str, temp, isDir);
+        res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
-            efree(str);
+            zend_string_release(filename);
             break;
         }
         
         zval entry;
-        ZVAL_STR(&entry, zend_string_init(ZEND_STRL(str), 0));
+        ZVAL_STR(&entry, filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
-            efree(str);
+            zend_string_release(filename);
             RETURN_FALSE;
         }
         
-        efree(str);
-        //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
     
     SzFree(NULL, temp);
