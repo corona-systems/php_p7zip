@@ -289,7 +289,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     return res;
 }*/
 
-static SRes PrintString(char** str, const UInt16 *s, unsigned isDir){
+static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     size_t size;
