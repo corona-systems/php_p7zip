@@ -564,7 +564,7 @@ PHP_FUNCTION(p7zip_list){
     if(res != SZ_OK)
         RETURN_LONG(res);
 
-    ZVAL_ARR(return_value, ht);
+    RETURN_ARR(ht);
     
 }
 
