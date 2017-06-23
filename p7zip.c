@@ -271,7 +271,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #endif
 }
 
-static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
+/*static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -284,6 +284,27 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
         *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? -1 : 0), 0);
         if(isDir)
             (*str)->val[buf.size - (size_t)2] = '/';
+    }
+    Buf_Free(&buf, &g_Alloc);
+    return res;
+}*/
+
+static SRes PrintString(char** str, const UInt16 *s, unsigned isDir){
+    CBuf buf;
+    SRes res;
+    size_t size;
+    Buf_Init(&buf);
+    res = Utf16_To_Char(&buf, s
+    #ifndef _USE_UTF8
+    , CP_OEMCP
+    #endif
+    );
+    if (res == SZ_OK){
+        size = buf.size - (!isDir ? 1 : 0);
+        *str = (char*) emalloc(size);
+        memcpy(*str, buf.data, size);
+        if(isDir)
+            (*str)[size - (size_t)1] = '/';
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
@@ -524,7 +545,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
-        zend_string* filename;
+        char* filename;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -545,19 +566,21 @@ PHP_FUNCTION(p7zip_list){
         res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
-            zend_string_release(filename);
+            //zend_string_release(filename);
+            efree(filename);
             break;
         }
         
         zval entry;
-        ZVAL_STR(&entry, filename);
+        ZVAL_STRING(&entry, filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
-            zend_string_release(filename);
+            //zend_string_release(filename);
+            efree(filename);
             RETURN_FALSE;
         }
         
-        zend_string_release(filename);
+        efree(filename);
     }
     
     SzFree(NULL, temp);
