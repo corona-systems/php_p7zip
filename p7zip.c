@@ -542,7 +542,7 @@ PHP_FUNCTION(p7zip_list){
     
     HashTable* ht;
     ALLOC_HASHTABLE(ht);
-    zend_hash_init(ht, file->db.NumFiles, ZVAL_PTR_DTOR, NULL, 0);
+    zend_hash_init(ht, file->db.NumFiles, NULL, ZVAL_PTR_DTOR, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
         zend_string filename;
