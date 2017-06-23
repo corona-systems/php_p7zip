@@ -545,7 +545,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
 
     for (i = 0; i < file->db.NumFiles; i++){
-        zend_string* filename;
+        zend_string filename;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -563,7 +563,7 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(filename, temp, isDir);
+        res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
             zend_string_release(filename);
@@ -571,13 +571,13 @@ PHP_FUNCTION(p7zip_list){
         }
         
         zval entry;
-        ZVAL_STR(&entry, filename);
+        ZVAL_STR(&entry, &filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
         }
-        php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
+        //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
     
     SzFree(NULL, temp);
