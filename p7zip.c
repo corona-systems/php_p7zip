@@ -570,16 +570,12 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        zval* entry;
-        //ZVAL_STR(&entry, filename);
+        zval entry;
+        ZVAL_STR(&entry, filename);
         
-        if((entry = (zval*)zend_hash_index_add_empty_element(ht, i)) == NULL){
+        if(zend_hash_add(ht, filename, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
-        }
-        else{
-            ZVAL_STR(entry, filename);
-            //zend_string_release(filename);
         }
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
