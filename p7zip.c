@@ -577,6 +577,8 @@ PHP_FUNCTION(p7zip_list){
             zend_string_release(filename);
             RETURN_FALSE;
         }
+        
+        zend_string_release(filename);
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
     
