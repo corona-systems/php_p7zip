@@ -527,7 +527,7 @@ PHP_FUNCTION(p7zip_list){
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
-        
+        php_printf("%u", len);
         if (len > tempSize){
           SzFree(NULL, temp);
           tempSize = len;
@@ -542,10 +542,7 @@ PHP_FUNCTION(p7zip_list){
             break;  
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        php_printf("%u\n", len);
         res = ConvertString(filename, temp, isDir);
-        
-        PHPWRITE(ZSTR_VAL(filename), ZSTR_LEN(filename));
         
         if(res != SZ_OK){
             zend_string_release(filename);
