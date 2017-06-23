@@ -281,9 +281,9 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        *str = zend_string_init(buf.data, buf.size + (!isDir ? 0 : 1), 0);
+        *str = zend_string_init(buf.data, buf.size + (!isDir ? 1 : 2), 0);
         if(isDir)
-            (*str)->val[buf.size - (size_t)2] = '/';
+            (*str)->val[buf.size - (size_t)1] = '/';
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
@@ -556,6 +556,8 @@ PHP_FUNCTION(p7zip_list){
             zend_string_release(filename);
             RETURN_FALSE;
         }
+        
+        zend_string_release(filename);
     }
     
     SzFree(NULL, temp);
