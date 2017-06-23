@@ -562,8 +562,9 @@ PHP_FUNCTION(p7zip_list){
         if (res != SZ_OK)
             break;  
         
-        SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(&filename, temp, isDir);
+        /*SzArEx_GetFileNameUtf16(&file->db, i, temp);
+        res = ConvertString(&filename, temp, isDir);*/
+        filename = zend_string_init("Bla", 4);
         
         if(res != SZ_OK){
             zend_string_release(filename);
@@ -578,8 +579,6 @@ PHP_FUNCTION(p7zip_list){
             RETURN_FALSE;
         }
         
-        zend_string* tmp;/* = (zend_string*) 0x7F85C6277000;
-        PHP_WRITE(ZSTR_VAL(tmp), ZSTR_LEN(tmp));*/
                 
     }
     
