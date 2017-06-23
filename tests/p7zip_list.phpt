@@ -25,3 +25,7 @@ array(2) {
   [1]=>
   string(10) "test2.text"
 }
+array(1) {
+  [0]=>
+  string(14) "test/test.text"
+}
