@@ -520,7 +520,8 @@ PHP_FUNCTION(p7zip_list){
     size_t tempSize = 0;
     
     HashTable* ht;
-    zend_hash_init(ht, 10, NULL, NULL, 0);
+    ALLOC_HASHTABLE(ht);
+    zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
     
     for (i = 0; i < file->db.NumFiles; i++){
         zend_string* filename;
