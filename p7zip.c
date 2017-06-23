@@ -566,7 +566,7 @@ PHP_FUNCTION(p7zip_list){
         res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
-            zend_string_release(filename);
+            //zend_string_release(filename);
             break;
         }
         
@@ -574,7 +574,7 @@ PHP_FUNCTION(p7zip_list){
         ZVAL_STR(&entry, &filename);
         
         if(zend_hash_index_add_new(ht, i, &entry) == NULL){
-            zend_string_release(filename);
+            //zend_string_release(filename);
             RETURN_FALSE;
         }
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
