@@ -580,6 +580,7 @@ PHP_FUNCTION(p7zip_list){
         }
         
         efree(entry);
+        zend_string_release(filename);
     }
     
     SzFree(NULL, temp);
