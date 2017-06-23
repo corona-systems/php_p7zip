@@ -257,7 +257,7 @@ static WRes MyCreateDir(const UInt16 *name){
     #endif
 }
 
-/*static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
+static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #ifdef USE_WINDOWS_FILE
     return OutFile_OpenW(p, name);
     #else
@@ -269,7 +269,7 @@ static WRes MyCreateDir(const UInt16 *name){
     Buf_Free(&buf, &g_Alloc);
     return res;
     #endif
-}*/
+}
 
 static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
@@ -289,7 +289,7 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     return res;
 }
 
-static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
+/*static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     size_t size;
@@ -308,7 +308,7 @@ static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     }
     Buf_Free(&buf, &g_Alloc);
     return res;
-}
+}*/
 
 static void UInt64ToStr(UInt64 value, char *s){
     char temp[32];
