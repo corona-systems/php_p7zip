@@ -566,8 +566,7 @@ PHP_FUNCTION(p7zip_list){
         res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
-            //zend_string_release(filename);
-            efree(filename);
+            zend_string_release(filename);
             break;
         }
         
@@ -580,7 +579,7 @@ PHP_FUNCTION(p7zip_list){
             RETURN_FALSE;
         }
         
-        efree(zval);
+        efree(entry);
     }
     
     SzFree(NULL, temp);
