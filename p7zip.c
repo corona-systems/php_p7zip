@@ -585,7 +585,8 @@ PHP_FUNCTION(p7zip_list){
     if(res != SZ_OK)
         RETURN_LONG(res);
 
-    RETURN_ARR(zend_array_dup(ht));
+    RETVAL_ARR(zend_array_dup(ht));
+    zend_hash_destroy(ht);
     
 }
 
