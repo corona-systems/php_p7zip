@@ -571,11 +571,15 @@ PHP_FUNCTION(p7zip_list){
         }
         
         zval entry;
-        ZVAL_STR(&entry, filename);
+        //ZVAL_STR(&entry, filename);
         
-        if(zend_hash_index_add(ht, i, &entry) == NULL){
+        if((entry = zend_hash_index_add_empty_element(ht, i, &entry)) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
+        }
+        else{
+            ZVAL_STR_COPY(&entry, filename);
+            zend_string_release(filename);
         }
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
     }
