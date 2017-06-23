@@ -562,9 +562,8 @@ PHP_FUNCTION(p7zip_list){
         if (res != SZ_OK)
             break;  
         
-        /*SzArEx_GetFileNameUtf16(&file->db, i, temp);
-        res = ConvertString(&filename, temp, isDir);*/
-        filename = zend_string_init("Bla", 3, 0);
+        SzArEx_GetFileNameUtf16(&file->db, i, temp);
+        res = ConvertString(&filename, temp, isDir);
         
         if(res != SZ_OK){
             zend_string_release(filename);
@@ -578,7 +577,7 @@ PHP_FUNCTION(p7zip_list){
             zend_string_release(filename);
             RETURN_FALSE;
         }
-        
+        php_printf("%X %u\n", filename, sizeof(filename));
     }
     
     SzFree(NULL, temp);
