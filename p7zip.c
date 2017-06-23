@@ -578,7 +578,7 @@ PHP_FUNCTION(p7zip_list){
             RETURN_FALSE;
         }
         else{
-            ZVAL_STR_COPY(entry, filename);
+            ZVAL_STR(entry, filename);
             zend_string_release(filename);
         }
         //php_printf("%X %u %X %u\n", filename, sizeof(*filename), &entry, sizeof(entry));
