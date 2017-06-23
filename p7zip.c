@@ -528,7 +528,6 @@ PHP_FUNCTION(p7zip_list){
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
-        php_printf("%u", len);
         if (len > tempSize){
           SzFree(NULL, temp);
           tempSize = len;
@@ -550,10 +549,10 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        zval* entry;
-        ZVAL_STR(entry, filename);
+        zval entry;
+        ZVAL_STR(&entry, filename);
         
-        if(zend_hash_index_add_new(ht, i, entry) == NULL){
+        if(zend_hash_index_add_new(ht, i, &entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
         }
