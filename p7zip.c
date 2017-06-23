@@ -274,7 +274,6 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
 static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
-    char* tmp;
     Buf_Init(&buf);
     res = Utf16_To_Char(&buf, s
     #ifndef _USE_UTF8
@@ -282,8 +281,7 @@ static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        tmp = estrndup(buf.data, buf.size + !isDir ? 0 : 1);
-        str = zend_string_init(tmp, strlen(tmp) + 1, 0);
+        str = zend_string_init(buf.data, buf.size + (!isDir ? 0 : 1), 0);
         if(isDir)
             str->val[buf.size - (size_t)2] = '/';
     }
