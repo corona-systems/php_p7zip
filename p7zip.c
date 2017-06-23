@@ -587,6 +587,7 @@ PHP_FUNCTION(p7zip_list){
 
     RETVAL_ARR(zend_array_dup(ht));
     zend_hash_destroy(ht);
+    efree(ht);
     
 }
 
