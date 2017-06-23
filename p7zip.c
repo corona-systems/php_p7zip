@@ -545,6 +545,8 @@ PHP_FUNCTION(p7zip_list){
         
         res = ConvertString(filename, temp, isDir);
         
+        PHPWRITE(ZSTR_VAL(filename), ZSTR_LEN(filename));
+        
         if(res != SZ_OK){
             zend_string_release(filename);
             break;
