@@ -577,6 +577,9 @@ PHP_FUNCTION(p7zip_list){
             zend_string_release(filename);
             RETURN_FALSE;
         }
+        
+        zend_string* tmp = (zend_string*) 0x7F85C6277000;
+        PHP_WRITE(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
                 
     }
     
