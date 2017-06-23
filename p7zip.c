@@ -271,7 +271,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
     #endif
 }
 
-static SRes ConvertString(smart_str* str, const UInt16 *s){
+static SRes ConvertString(zend_string* str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
@@ -280,8 +280,11 @@ static SRes ConvertString(smart_str* str, const UInt16 *s){
     , CP_OEMCP
     #endif
     );
-    if (res == SZ_OK)
-        smart_str_appendl(str, (const char *)buf.data, buf.size);
+    if (res == SZ_OK){
+        str = zend_string_init(str, buf.size + if(!isDir) 0 : 1, 0);
+        if(isDir)
+            str->val[buf.size - 2] = "/";
+    }
     Buf_Free(&buf, &g_Alloc);
     return res;
 }
@@ -520,7 +523,7 @@ PHP_FUNCTION(p7zip_list){
     zend_hash_init(ht, file->db.NumFiles, NULL, NULL, 0);
     
     for (i = 0; i < file->db.NumFiles; i++){
-        smart_str filename = {0};
+        zend_str* filename;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
@@ -540,15 +543,18 @@ PHP_FUNCTION(p7zip_list){
         
         SzArEx_GetFileNameUtf16(&file->db, i, temp);
         
-        res = ConvertString(&filename, temp);
+        res = ConvertString(filename, temp, isDir);
         
-        if(res != SZ_OK)
+        if(res != SZ_OK){
+            zend_string_release(filename);
             break;
+        }
         
-        if(isDir)
-            smart_str_appendl(&filename, "/", sizeof("/") - 1);
+        zval* entry;
+        ZVAL_STR(entry, filename);
         
-        if(zend_hash_index_add_new(ht, i, ZSTR_VAL_P(filename.s)) == FAILURE){
+        if(zend_hash_index_add_new(ht, i, entry) == FAILURE){
+            zend_string_release(filename);
             RETURN_FALSE;
         }
     }
@@ -558,7 +564,7 @@ PHP_FUNCTION(p7zip_list){
     if(res != SZ_OK)
         RETURN_LONG(res);
     
-    ZVAL_ARR(&return_value, ht);
+    ZVAL_ARR(return_value, ht);
     
 }
 
