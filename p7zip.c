@@ -281,7 +281,7 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        *str = zend_string_init(buf.data, buf.size + (!isDir ? 1 : 2), 0);
+        *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? 1 : 2), 0);
         if(isDir)
             (*str)->val[buf.size - (size_t)1] = '/';
     }
