@@ -300,7 +300,7 @@ static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
     #endif
     );
     if (res == SZ_OK){
-        size = buf.size - (!isDir ? 1 : 0);
+        size = buf.size + (!isDir ? 0 : 1);
         *str = (char*) emalloc(size);
         memcpy(*str, buf.data, size);
         if(isDir)
