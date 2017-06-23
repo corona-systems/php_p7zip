@@ -549,15 +549,15 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        zval* entry;
-        entry = (zval*) emalloc(sizeof(zval));
-        ZVAL_STR(entry, filename);
+        zval entry;
+        ZVAL_STR(&entry, zend_string_copy(filename));
         
         if(zend_hash_index_add_new(ht, i, entry) == NULL){
             zend_string_release(filename);
             RETURN_FALSE;
         }
         
+        zend_string_release(filename);
     }
     
     SzFree(NULL, temp);
