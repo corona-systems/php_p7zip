@@ -564,7 +564,7 @@ PHP_FUNCTION(p7zip_list){
         
         /*SzArEx_GetFileNameUtf16(&file->db, i, temp);
         res = ConvertString(&filename, temp, isDir);*/
-        filename = zend_string_init("Bla", 4);
+        filename = zend_string_init("Bla", 4, 0);
         
         if(res != SZ_OK){
             zend_string_release(filename);
