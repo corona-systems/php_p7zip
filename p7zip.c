@@ -557,10 +557,11 @@ PHP_FUNCTION(p7zip_list){
             zend_string_release(filename);
             RETURN_FALSE;
         }
+        
+        zend_string_release(filename);
     }
     
     SzFree(NULL, temp);
-    zend_string_release(filename);
     
     if(res != SZ_OK)
         RETURN_LONG(res);
