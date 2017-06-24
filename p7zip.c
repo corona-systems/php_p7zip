@@ -587,8 +587,7 @@ PHP_FUNCTION(p7zip_list){
           
           if (SzBitWithVals_Check(&file->db.CRCs, i))
             snprintf(crc, 16, "%X", file->db.CRCs.Vals[i]);
-            
-          ZVAL_STRING(&se, s);
+        
           ZVAL_STRING(&te, t);
           ZVAL_STRING(&ce, crc);
           
