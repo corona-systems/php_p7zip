@@ -736,14 +736,13 @@ PHP_FUNCTION(p7zip_extract){
             #endif
         }
         
-        IAlloc_Free(&file->allocImp, outBuffer);
-        SzFree(NULL, temp);
-        
-        if(res != SZ_OK)
-            RETURN_LONG(res);
-        
-        RETURN_TRUE;
-    }
+    IAlloc_Free(&file->allocImp, outBuffer);
+    SzFree(NULL, temp);
+    
+    if(res != SZ_OK)
+        RETURN_LONG(res);
+    
+    RETURN_TRUE;
 }
 
 /* {{{ PHP_MINIT_FUNCTION
