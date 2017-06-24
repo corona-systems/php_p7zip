@@ -598,14 +598,14 @@ PHP_FUNCTION(p7zip_list){
                 zend_hash_destroy(sub);
                 zend_hash_destroy(ht);
                 zend_string_release(filename);
-                RETURN_NULL;
+                RETURN_NULL();
             }
         }
         else{
             if(zend_hash_add_empty_element(ht, filename) == NULL){
                 zend_hash_destroy(ht);
                 zend_string_release(filename);
-                RETURN_NULL;
+                RETURN_NULL();
             }
         }
         
