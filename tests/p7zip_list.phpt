@@ -38,3 +38,34 @@ array(1) {
   ["test/test.text"]=>
   NULL
 }
+array(2) {
+  ["test.text"]=>
+  array(3) {
+    ["Size"]=>
+    int(5)
+    ["LastWriteTime"]=>
+    string(19) "2017-06-21 15:38:34"
+    ["CRC"]=>
+    string(8) "FA781AC2"
+  }
+  ["test2.text"]=>
+  array(3) {
+    ["Size"]=>
+    int(5)
+    ["LastWriteTime"]=>
+    string(19) "2017-06-21 15:38:16"
+    ["CRC"]=>
+    string(8) "FA781AC2"
+  }
+}
+array(1) {
+  ["test/test.text"]=>
+  array(3) {
+    ["Size"]=>
+    int(5)
+    ["LastWriteTime"]=>
+    string(19) "2017-06-21 15:38:34"
+    ["CRC"]=>
+    string(8) "FA781AC2"
+  }
+}
