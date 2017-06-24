@@ -13,6 +13,15 @@ p7zip_close($handle);
 $handle = p7zip_open(dirname(__FILE__)."/test_dir.7z");
 var_dump(p7zip_list($handle));
 p7zip_close($handle);
+$handle = p7zip_open(dirname(__FILE__)."/test.7z");
+var_dump(p7zip_list($handle, TRUE));
+p7zip_close($handle);
+$handle = p7zip_open(dirname(__FILE__)."/test2.7z");
+var_dump(p7zip_list($handle, TRUE));
+p7zip_close($handle);
+$handle = p7zip_open(dirname(__FILE__)."/test_dir.7z");
+var_dump(p7zip_list($handle, TRUE));
+p7zip_close($handle);
 ?>
 --EXPECT--
 array(1) {
