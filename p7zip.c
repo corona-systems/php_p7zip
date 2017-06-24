@@ -310,7 +310,7 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     return res;
 }*/
 
-static void UInt64ToStr(UInt64 value, char *s){
+/*static void UInt64ToStr(UInt64 value, char *s){
     char temp[32];
     int pos = 0;
     do{
@@ -322,7 +322,7 @@ static void UInt64ToStr(UInt64 value, char *s){
         *s++ = temp[--pos];
     while (pos);
     *s = '\0';
-}
+}*/
 
 static char *UIntToStr(char *s, unsigned value, int numDigits){
     char temp[16];
@@ -571,7 +571,7 @@ PHP_FUNCTION(p7zip_list){
         }
         
         if(full_info){
-            char s[32], t[32], crc[17];
+            char t[32], crc[17];
             UInt64 fileSize;
             
             zval se, te, ce, entry;
@@ -580,7 +580,7 @@ PHP_FUNCTION(p7zip_list){
             zend_hash_init(sub, 3, NULL, ZVAL_PTR_DTOR, 0);
             
             fileSize = SzArEx_GetFileSize(&file->db, i);
-            UInt64ToStr(fileSize, s);
+            ZVAL_LONG(&se, fileSize);
           
           if (SzBitWithVals_Check(&file->db.MTime, i))
             ConvertFileTimeToString(&file->db.MTime.Vals[i], t);
