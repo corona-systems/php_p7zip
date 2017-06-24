@@ -5,7 +5,7 @@ p7zip_extract() function
 --FILE--
 <?php
 $handle = p7zip_open(dirname(__FILE__)."/test.7z");
-echo p7zip_extract($handle) = SZ_ERROR_FAIL ? "OK" : "Failure";
+echo p7zip_extract($handle) != SZ_ERROR_FAIL ? "OK" : "Failure";
 p7zip_close($handle);
 $test1 = file_get_contents(dirname(__FILE__)."/test.text");
 $test2 = file_get_contents(dirname(__FILE__)."/test2.text");
