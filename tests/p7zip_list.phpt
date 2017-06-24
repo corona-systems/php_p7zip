@@ -16,7 +16,7 @@ p7zip_close($handle);
 ?>
 --EXPECT--
 array(1) {
-  ["test.txt"]=>
+  ["test.text"]=>
   NULL
 }
 array(2) {
