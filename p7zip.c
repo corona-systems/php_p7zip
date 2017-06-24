@@ -398,9 +398,9 @@ static void GetAttribString(UInt32 wa, Bool isDir, char *s){
     #endif
 }
 
-/* {{{ proto Resource p7zip_open(string filename)
-   Opens a 7zip file */
-
+/* {{{ proto resource p7zip_open(string filename)
+ *  Opens a 7zip file
+ */
 PHP_FUNCTION(p7zip_open){
     zend_string* filename;
     char resolved_path[MAXPATHLEN + 1];
@@ -458,9 +458,9 @@ PHP_FUNCTION(p7zip_open){
 }
 /* }}} */
 
-/* {{{ proto void p7zip_close(Resource zip)
-   Closes a 7zip file */
-
+/* {{{ proto void p7zip_close(resource file)
+ * Closes a 7zip file
+ */
 PHP_FUNCTION(p7zip_close){
     zval* val;
     p7zip_file_t* file;
@@ -473,10 +473,15 @@ PHP_FUNCTION(p7zip_close){
         RETURN_FALSE;
     }
     
+    File_Close(&file->archiveStream.file);
+    
     zend_list_close(Z_RES_P(val));
 }
 /* }}} */
 
+/* {{{ proto mixed p7zip_test(resource file)
+ * Tests a 7zip file for integrity and compatibility
+ */
 PHP_FUNCTION(p7zip_test){
     zval* val;
     p7zip_file_t* file;
@@ -521,7 +526,11 @@ PHP_FUNCTION(p7zip_test){
     RETURN_TRUE;
     
 }
+/* }}} */
 
+/* {{{ proto mixed p7zip_list(resource file [, bool full_info)
+ * Lists a 7zip file's entries
+ */
 PHP_FUNCTION(p7zip_list){
     zval* val;
     p7zip_file_t* file;
@@ -626,8 +635,115 @@ PHP_FUNCTION(p7zip_list){
         RETURN_LONG(res);
 
     RETURN_ARR(ht);
+}
+/* }}} */
+
+
+PHP_FUNCTION(p7zip_extract){
+    zval* val;
+    p7zip_file_t* file;
+    zend_bool full_paths = 0;
     
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &full_paths) == FAILURE) {
+        return;
+    }
+
+    if ((file = (p7zip_file_t*) zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
+        RETURN_FALSE;
+    }
     
+    UInt32 i;
+    SRes res = SZ_OK;
+    UInt16 *temp = NULL;
+    size_t tempSize = 0;
+    UInt32 blockIndex = 0xFFFFFFFF;
+    Byte *outBuffer = 0;
+    size_t outBufferSize = 0;
+    
+    for (i = 0; i < file->db.NumFiles; i++){
+        size_t offset = 0;
+        size_t outSizeProcessed = 0;
+        size_t len;
+        unsigned isDir = SzArEx_IsDir(&file->db, i);
+        if (isDir && !full_paths)
+          continue;
+        len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
+
+        if (len > tempSize){
+          SzFree(NULL, temp);
+          tempSize = len;
+          temp = (UInt16 *)SzAlloc(NULL, tempSize * sizeof(temp[0]));
+          if (!temp)
+          {
+            res = SZ_ERROR_MEM;
+            break;
+          }
+        }
+
+        SzArEx_GetFileNameUtf16(&file->db, i, temp);
+        
+        if(!isDir){
+            res = SzArEx_Extract(&file->db, &file->lookStream.s, i,
+                &blockIndex, &outBuffer, &outBufferSize,
+                &offset, &outSizeProcessed,
+                &file->allocImp, &file->allocTempImp);
+        }
+        
+        CSzFile outFile;
+        size_t processedSize;
+        size_t j;
+        UInt16 *name = (UInt16 *)temp;
+        const UInt16 *destPath = (const UInt16 *)name;
+ 
+        for (j = 0; name[j] != 0; j++)
+            if (name[j] == '/'){
+                if (full_paths){
+                    name[j] = 0;
+                    MyCreateDir(name);
+                    name[j] = CHAR_PATH_SEPARATOR;
+                }
+                else
+                    destPath = name + j + 1;
+            }
+            
+            if (isDir){
+                MyCreateDir(destPath);
+                continue;
+            }
+            else if (OutFile_OpenUtf16(&outFile, destPath)){
+                php_error_docref(NULL, E_ERROR, "Can't open output file");
+                res = SZ_ERROR_FAIL;
+                break;
+            }
+            
+            processedSize = outSizeProcessed;
+            
+            if (File_Write(&outFile, outBuffer + offset, &processedSize) != 0 || processedSize != outSizeProcessed){
+                php_error_docref(NULL, E_ERROR, "Can't write output file");
+                res = SZ_ERROR_FAIL;
+                break;
+            }
+            
+            if (File_Close(&outFile)){
+                php_error_docref(NULL, E_ERROR, "Can't close output file");
+                res = SZ_ERROR_FAIL;
+                break;
+            }
+            
+            #ifdef USE_WINDOWS_FILE
+            if (SzBitWithVals_Check(&db.Attribs, i))
+                SetFileAttributesW(destPath, db.Attribs.Vals[i]);
+            #endif
+        }
+        
+        IAlloc_Free(&file->allocImp, outBuffer);
+        SzFree(NULL, temp);
+        
+        if(res != SZ_OK)
+            RETURN_LONG(res);
+        
+        RETURN_TRUE;
+    }
 }
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -644,6 +760,7 @@ PHP_MINIT_FUNCTION(p7zip)
         REGISTER_LONG_CONSTANT("SZ_ERROR_UNSUPPORTED", SZ_ERROR_UNSUPPORTED, CONST_CS | CONST_PERSISTENT);
         REGISTER_LONG_CONSTANT("SZ_ERROR_CRC", SZ_ERROR_CRC, CONST_CS | CONST_PERSISTENT);
         REGISTER_LONG_CONSTANT("SZ_ERROR_MEM", SZ_ERROR_MEM, CONST_CS | CONST_PERSISTENT);
+        REGISTER_LONG_CONSTANT("SZ_ERROR_FAIL", SZ_ERROR_FAIL, CONST_CS | CONST_PERSISTENT);
         
         CrcGenerateTable();
         
@@ -714,6 +831,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_list, 0, 0, 1)
         ZEND_ARG_INFO(0, full_info)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_p7zip_extract, 0, 0, 1)
+	ZEND_ARG_INFO(0, handle)
+        ZEND_ARG_INFO(0, full_paths)
+ZEND_END_ARG_INFO()
+
 /* {{{ p7zip_functions[]
  *
  * Every user visible function must have an entry in p7zip_functions[].
@@ -723,6 +845,7 @@ const zend_function_entry p7zip_functions[] = {
         PHP_FE(p7zip_close, arginfo_p7zip_close)
         PHP_FE(p7zip_test, arginfo_p7zip_test)
         PHP_FE(p7zip_list, arginfo_p7zip_list)
+        PHP_FE(p7zip_extract, arginfo_p7zip_extract)
 	PHP_FE_END	/* Must be the last line in p7zip_functions[] */
 };
 /* }}} */
