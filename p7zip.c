@@ -574,7 +574,7 @@ PHP_FUNCTION(p7zip_list){
             char s[32], t[32], crc[17];
             UInt64 fileSize;
             
-            zval se, te, ce;
+            zval se, te, ce, entry;
             HashTable* sub;
             ALLOC_HASHTABLE(sub);
             zend_hash_init(sub, 3, NULL, ZVAL_PTR_DTOR, 0);
@@ -599,7 +599,17 @@ PHP_FUNCTION(p7zip_list){
                 zend_hash_destroy(ht);
                 zend_string_release(filename);
                 RETURN_NULL();
+          }
+          
+          ZVAL_ARR(&entry, sub);
+          
+          if(zend_hash_add_new(ht, filename, sub) == NULL){
+                zend_hash_destroy(sub);
+                zend_hash_destroy(ht);
+                zend_string_release(filename);
+                RETURN_NULL();
             }
+            
         }
         else{
             if(zend_hash_add_empty_element(ht, filename) == NULL){
