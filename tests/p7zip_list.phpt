@@ -22,7 +22,7 @@ array(1) {
 array(2) {
   ["test.text"]=>
   NULL
-  ["test2.text]=>
+  ["test2.text"]=>
   NULL
 }
 array(1) {
