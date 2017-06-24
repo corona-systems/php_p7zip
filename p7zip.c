@@ -592,9 +592,9 @@ PHP_FUNCTION(p7zip_list){
           ZVAL_STRING(&te, t);
           ZVAL_STRING(&ce, crc);
           
-          if(zend_hash_str_add_new(sub, "Size", strlen("Size"), &se) == NULL || 
+          if(zend_hash_str_add_new(sub, "Size", strlen("Size"), &se) == NULL ||
             zend_hash_str_add_new(sub, "LastWriteTime", strlen("LastWriteTime"), &te) == NULL ||
-            zend_hash_str_add_new(sub, "CRC", strlen("CRC"), &ce) == NULL)){
+            zend_hash_str_add_new(sub, "CRC", strlen("CRC"), &ce) == NULL){
                 zend_hash_destroy(sub);
                 zend_hash_destroy(ht);
                 zend_string_release(filename);
