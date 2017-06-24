@@ -570,12 +570,43 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        zval entry;
-        ZVAL_STR(&entry, filename);
-        
-        if(zend_hash_index_add_new(ht, i, &entry) == NULL){
-            zend_string_release(filename);
-            RETURN_FALSE;
+        if(full_info){
+            char s[32], t[32], crc[17];
+            UInt64 fileSize;
+            
+            zval se, te, ce;
+            HashTable* sub;
+            ALLOC_HASHTABLE(sub);
+            zend_hash_init(sub, 3, NULL, ZVAL_PTR_DTOR, 0);
+            
+            fileSize = SzArEx_GetFileSize(&file->db, i);
+            UInt64ToStr(fileSize, s);
+          
+          if (SzBitWithVals_Check(&file->db.MTime, i))
+            ConvertFileTimeToString(&file->db.MTime.Vals[i], t);
+          
+          if (SzBitWithVals_Check(&file->db.CRCs, i))
+            snprintf(crc, 16, "%X", file->db.CRCs.Vals[i]);
+            
+          ZVAL_STRING(&se, s);
+          ZVAL_STRING(&te, t);
+          ZVAL_STRING(&ce, crc);
+          
+          if(zend_hash_str_add_new(sub, "Size", strlen("Size"), &se) == NULL || 
+            zend_hash_str_add_new(sub, "LastWriteTime", strlen("LastWriteTime"), &te) == NULL ||
+            zend_hash_str_add_new(sub, "CRC", strlen("CRC"), &ce) == NULL)){
+                zend_hash_destroy(sub);
+                zend_hash_destroy(ht);
+                zend_string_release(filename);
+                RETURN_NULL;
+            }
+        }
+        else{
+            if(zend_hash_add_empty_element(ht, filename) == NULL){
+                zend_hash_destroy(ht);
+                zend_string_release(filename);
+                RETURN_NULL;
+            }
         }
         
     }
@@ -603,6 +634,7 @@ PHP_MINIT_FUNCTION(p7zip)
         REGISTER_LONG_CONSTANT("SZ_OK", SZ_OK, CONST_CS | CONST_PERSISTENT);
         REGISTER_LONG_CONSTANT("SZ_ERROR_UNSUPPORTED", SZ_ERROR_UNSUPPORTED, CONST_CS | CONST_PERSISTENT);
         REGISTER_LONG_CONSTANT("SZ_ERROR_CRC", SZ_ERROR_CRC, CONST_CS | CONST_PERSISTENT);
+        REGISTER_LONG_CONSTANT("SZ_ERROR_MEM", SZ_ERROR_MEM, CONST_CS | CONST_PERSISTENT);
         
         CrcGenerateTable();
         

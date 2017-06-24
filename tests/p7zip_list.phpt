@@ -16,16 +16,16 @@ p7zip_close($handle);
 ?>
 --EXPECT--
 array(1) {
-  [0]=>
-  string(9) "test.text"
+  ["test.txt"]=>
+  NULL
 }
 array(2) {
-  [0]=>
-  string(9) "test.text"
-  [1]=>
-  string(10) "test2.text"
+  ["test.text"]=>
+  NULL
+  ["test2.text]=>
+  NULL
 }
 array(1) {
-  [0]=>
-  string(14) "test/test.text"
+  ["test/test.text"]=>
+  NULL
 }
