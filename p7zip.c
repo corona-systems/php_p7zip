@@ -603,7 +603,7 @@ PHP_FUNCTION(p7zip_list){
           
           ZVAL_ARR(&entry, sub);
           
-          if(zend_hash_add_new(ht, filename, sub) == NULL){
+          if(zend_hash_add_new(ht, filename, &entry) == NULL){
                 zend_hash_destroy(sub);
                 zend_hash_destroy(ht);
                 zend_string_release(filename);
