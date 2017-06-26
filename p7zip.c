@@ -221,8 +221,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const char* path, const UInt16 *name){
     if(len > MAXPATHLEN)
         len = MAXPATHLEN;
     snprintf(fullPath, len, "%s%c%s", path, CHAR_PATH_SEPARATOR, (const char *)buf.data);
-    php_printf("%s", fullPath);
-    res = OutFile_Open(p, (const char *)buf.data);
+    res = OutFile_Open(p, fullPath);
     Buf_Free(&buf, &g_Alloc);
     return res;
 }
