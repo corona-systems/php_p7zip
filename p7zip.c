@@ -426,8 +426,6 @@ PHP_FUNCTION(p7zip_close){
         RETURN_FALSE;
     }
     
-    efree(file->filename);
-    
     File_Close(&file->archiveStream.file);
     
     zend_list_close(Z_RES_P(val));
