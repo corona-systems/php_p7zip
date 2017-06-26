@@ -43,22 +43,6 @@ extern zend_module_entry p7zip_module_entry;
 #include "lzma-sdk/C/7z.h"
 #include "lzma-sdk/C/7zFile.h"
 
-/*
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:
-
-ZEND_BEGIN_MODULE_GLOBALS(p7zip)
-	zend_long  global_value;
-	char *global_string;
-ZEND_END_MODULE_GLOBALS(p7zip)
-*/
-
-/* Always refer to the globals in your function as P7ZIP_G(variable).
-   You are encouraged to rename these macros something shorter, see
-   examples in any other php module directory.
-*/
-
-#define P7ZIP_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(p7zip, v)
 
 #if defined(ZTS) && defined(COMPILE_DL_P7ZIP)
 ZEND_TSRMLS_CACHE_EXTERN()
