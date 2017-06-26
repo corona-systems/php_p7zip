@@ -621,11 +621,13 @@ PHP_FUNCTION(p7zip_extract){
     else{
         char* fileDirectory = dirname(file->filename);
         
+        php_printf("%s", fileDirectory);
+        
         if(php_check_open_basedir(fileDirectory)){
             RETURN_FALSE;
         }
         
-        strncpy(resolvedPath, fileDirectory, strlen(fileDirectory));
+        strncpy(resolvedPath, fileDirectory, strlen(fileDirectory) + 1);
     }
     
     UInt32 i;
