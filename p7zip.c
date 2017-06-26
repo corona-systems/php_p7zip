@@ -544,6 +544,8 @@ PHP_FUNCTION(p7zip_extract){
         if(!expand_filepath(ZSTR_VAL(directory), resolvedPath)) {
             RETURN_FALSE;
         }
+        
+        php_printf("%s", resolvedPath);
     }
     else{
         char* fileDirectory = dirname(file->filename);
