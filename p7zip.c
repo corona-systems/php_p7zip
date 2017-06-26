@@ -357,7 +357,7 @@ PHP_FUNCTION(p7zip_open){
     char resolvedPath[MAXPATHLEN + 1];
     p7zip_file_t* file;
     SRes res;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &filename) == FAILURE) {
         return;
     }
     
@@ -377,6 +377,8 @@ PHP_FUNCTION(p7zip_open){
     file = (p7zip_file_t*) emalloc(sizeof(p7zip_file_t));
     
     snprintf(file->filename, strlen(resolvedPath), "%s", resolvedPath);
+    
+    php_printf("%s\n", file->filename);
     
     file->allocImp.Alloc = SzAlloc;
     file->allocImp.Free = SzFree;
