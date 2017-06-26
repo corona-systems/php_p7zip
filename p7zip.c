@@ -35,36 +35,10 @@
 #include "lzma-sdk/C/7zCrc.h"
 #include "lzma-sdk/C/7zBuf.h"
 
-/* If you declare any globals in php_p7zip.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(p7zip)
-*/
 
 /* True global resources - no need for thread safety here */
 static int le_p7zip;
 #define le_p7zip_name "7Zip File Descriptor"
-
-/* {{{ PHP_INI
- */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("p7zip.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_p7zip_globals, p7zip_globals)
-    STD_PHP_INI_ENTRY("p7zip.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_p7zip_globals, p7zip_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
-/* {{{ php_p7zip_init_globals
- */
-/* Uncomment this function if you have INI entries
-static void php_p7zip_init_globals(zend_p7zip_globals *p7zip_globals)
-{
-	p7zip_globals->global_value = 0;
-	p7zip_globals->global_string = NULL;
-}
-*/
-/* }}} */
-
-//static int le_p7zip_descriptor;
 
 static void p7zip_free(zend_resource* rsrc){
     p7zip_file_t* file = (p7zip_file_t*) rsrc->ptr;
@@ -240,41 +214,6 @@ static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     return res;
 }
 
-/*static SRes ConvertString(char** str, const UInt16 *s, unsigned isDir){
-    CBuf buf;
-    SRes res;
-    size_t size;
-    Buf_Init(&buf);
-    res = Utf16_To_Char(&buf, s
-    #ifndef _USE_UTF8
-    , CP_OEMCP
-    #endif
-    );
-    if (res == SZ_OK){
-        size = buf.size + (!isDir ? 0 : 1);
-        *str = (char*) emalloc(size);
-        memcpy(*str, buf.data, size);
-        if(isDir)
-            (*str)[size - (size_t)1] = '/';
-    }
-    Buf_Free(&buf, &g_Alloc);
-    return res;
-}*/
-
-/*static void UInt64ToStr(UInt64 value, char *s){
-    char temp[32];
-    int pos = 0;
-    do{
-        temp[pos++] = (char)('0' + (unsigned)(value % 10));
-        value /= 10;
-    }
-    while (value != 0);
-    do
-        *s++ = temp[--pos];
-    while (pos);
-    *s = '\0';
-}*/
-
 static char *UIntToStr(char *s, unsigned value, int numDigits){
     char temp[16];
     int pos = 0;
@@ -334,20 +273,6 @@ static void ConvertFileTimeToString(const CNtfsFileTime *nt, char *s){
     UIntToStr_2(s, min); s[2] = ':'; s += 3;
     UIntToStr_2(s, sec); s[2] = 0;
 }
-
-/*static void GetAttribString(UInt32 wa, Bool isDir, char *s){
-    #ifdef USE_WINDOWS_FILE
-    s[0] = (char)(((wa & FILE_ATTRIBUTE_DIRECTORY) != 0 || isDir) ? 'D' : '.');
-    s[1] = (char)(((wa & FILE_ATTRIBUTE_READONLY ) != 0) ? 'R': '.');
-    s[2] = (char)(((wa & FILE_ATTRIBUTE_HIDDEN   ) != 0) ? 'H': '.');
-    s[3] = (char)(((wa & FILE_ATTRIBUTE_SYSTEM   ) != 0) ? 'S': '.');
-    s[4] = (char)(((wa & FILE_ATTRIBUTE_ARCHIVE  ) != 0) ? 'A': '.');
-    s[5] = 0;
-    #else
-    s[0] = (char)(((wa & (1 << 4)) != 0 || isDir) ? 'D' : '.');
-    s[1] = 0;
-    #endif
-}*/
 
 /* {{{ proto resource p7zip_open(string filename)
  *  Opens a 7zip file
@@ -483,7 +408,7 @@ PHP_FUNCTION(p7zip_test){
 }
 /* }}} */
 
-/* {{{ proto mixed p7zip_list(resource file [, bool full_info)
+/* {{{ proto mixed p7zip_list(resource file [, bool fullInfo)
  * Lists a 7zip file's entries
  */
 PHP_FUNCTION(p7zip_list){
@@ -593,7 +518,9 @@ PHP_FUNCTION(p7zip_list){
 }
 /* }}} */
 
-
+/* {{{ proto mixed p7zip_extract(resource file [, bool fullPaths, string directory])
+ * Extracts a 7zip file's entries
+ */
 PHP_FUNCTION(p7zip_extract){
     zval* val;
     p7zip_file_t* file;
@@ -717,15 +644,13 @@ PHP_FUNCTION(p7zip_extract){
     
     RETURN_TRUE;
 }
+/* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(p7zip)
 {
-	/* If you have INI entries, uncomment these lines
-	REGISTER_INI_ENTRIES();
-	*/
-        
+	
         le_p7zip = zend_register_list_destructors_ex(p7zip_free, NULL, le_p7zip_name, module_number);
         
         REGISTER_LONG_CONSTANT("SZ_OK", SZ_OK, CONST_CS | CONST_PERSISTENT);
@@ -744,30 +669,6 @@ PHP_MINIT_FUNCTION(p7zip)
  */
 PHP_MSHUTDOWN_FUNCTION(p7zip)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request start */
-/* {{{ PHP_RINIT_FUNCTION
- */
-PHP_RINIT_FUNCTION(p7zip)
-{
-#if defined(COMPILE_DL_P7ZIP) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-	return SUCCESS;
-}
-/* }}} */
-
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(p7zip)
-{
 	return SUCCESS;
 }
 /* }}} */
@@ -779,10 +680,6 @@ PHP_MINFO_FUNCTION(p7zip)
 	php_info_print_table_start();
 	php_info_print_table_header(2, "p7zip support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
@@ -830,8 +727,8 @@ zend_module_entry p7zip_module_entry = {
 	p7zip_functions,
 	PHP_MINIT(p7zip),
 	PHP_MSHUTDOWN(p7zip),
-	PHP_RINIT(p7zip),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(p7zip),	/* Replace with NULL if there's nothing to do at request end */
+	NULL,		/* Replace with NULL if there's nothing to do at request start */
+	NULL,	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(p7zip),
 	PHP_P7ZIP_VERSION,
 	STANDARD_MODULE_PROPERTIES
