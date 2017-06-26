@@ -22,6 +22,8 @@
 #include "config.h"
 #endif
 
+#include <libgen.h>
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
@@ -93,11 +95,7 @@ static int Buf_EnsureSize(CBuf *dest, size_t size){
     return Buf_Create(dest, size, &g_Alloc);
 }
 
-#ifndef _WIN32
 #define _USE_UTF8
-#endif
-
-/* #define _USE_UTF8 */
 
 #ifdef _USE_UTF8
 
@@ -191,95 +189,48 @@ static SRes Utf16_To_Utf8Buf(CBuf *dest, const UInt16 *src, size_t srcLen){
 
 #endif
 
-static SRes Utf16_To_Char(CBuf *buf, const UInt16 *s
-    #ifndef _USE_UTF8
-    , UINT codePage
-    #endif
-    ){
+static SRes Utf16_To_Char(CBuf *buf, const UInt16 *s){
     unsigned len = 0;
     for (len = 0; s[len] != 0; len++);
     
-    #ifndef _USE_UTF8
-    {
-        unsigned size = len * 3 + 100;
-        if (!Buf_EnsureSize(buf, size))
-            return SZ_ERROR_MEM;
-        {
-            buf->data[0] = 0;
-            if (len != 0){
-                char defaultChar = '_';
-                BOOL defUsed;
-                unsigned numChars = 0;
-                numChars = WideCharToMultiByte(codePage, 0, s, len, (char *)buf->data, size, &defaultChar, &defUsed);
-                if (numChars == 0 || numChars >= size)
-                    return SZ_ERROR_FAIL;
-                buf->data[numChars] = 0;
-            }
-            return SZ_OK;
-        }
-    }
-    #else
     return Utf16_To_Utf8Buf(buf, s, len);
-    #endif
 }
 
-#ifdef _WIN32
-  #ifndef USE_WINDOWS_FILE
-    static UINT g_FileCodePage = CP_ACP;
-  #endif
-  #define MY_FILE_CODE_PAGE_PARAM ,g_FileCodePage
-#else
-  #define MY_FILE_CODE_PAGE_PARAM
-#endif
-
-static WRes MyCreateDir(const UInt16 *name){
-    #ifdef USE_WINDOWS_FILE
-    
-    return CreateDirectoryW(name, NULL) ? 0 : GetLastError();
-    
-    #else
-    
+static WRes MyCreateDir(const char* path, const UInt16 *name){    
     CBuf buf;
     WRes res;
     Buf_Init(&buf);
-    RINOK(Utf16_To_Char(&buf, name MY_FILE_CODE_PAGE_PARAM));
-    
-    res =
-    #ifdef _WIN32
-    _mkdir((const char *)buf.data)
-    #else
-    mkdir((const char *)buf.data, 0777)
-    #endif
-    == 0 ? 0 : errno;
+    RINOK(Utf16_To_Char(&buf, name));
+    char fullPath[MAXPATHLEN + 1];
+    size_t len = buf.size + strlen(path);
+    if(len > MAXPATHLEN)
+        len = MAXPATHLEN;
+    snprintf(fullPath, len, "%s%c%s", path, CHAR_PATH_SEPARATOR, (const char *)buf.data);
+    res = mkdir(fullPath, 0775) == 0 ? 0 : errno;
     Buf_Free(&buf, &g_Alloc);
     return res;
-    
-    #endif
 }
 
-static WRes OutFile_OpenUtf16(CSzFile *p, const UInt16 *name){
-    #ifdef USE_WINDOWS_FILE
-    return OutFile_OpenW(p, name);
-    #else
+static WRes OutFile_OpenUtf16(CSzFile *p, const char* path, const UInt16 *name){
     CBuf buf;
     WRes res;
     Buf_Init(&buf);
-    RINOK(Utf16_To_Char(&buf, name MY_FILE_CODE_PAGE_PARAM));
+    RINOK(Utf16_To_Char(&buf, name));
+    char fullPath[MAXPATHLEN + 1];
+    size_t len = buf.size + strlen(path);
+    if(len > MAXPATHLEN)
+        len = MAXPATHLEN;
+    snprintf(fullPath, len, "%s%c%s", path, CHAR_PATH_SEPARATOR, (const char *)buf.data);
     res = OutFile_Open(p, (const char *)buf.data);
     Buf_Free(&buf, &g_Alloc);
     return res;
-    #endif
 }
 
 static SRes ConvertString(zend_string** str, const UInt16 *s, unsigned isDir){
     CBuf buf;
     SRes res;
     Buf_Init(&buf);
-    res = Utf16_To_Char(&buf, s
-    #ifndef _USE_UTF8
-    , CP_OEMCP
-    #endif
-    );
+    res = Utf16_To_Char(&buf, s);
     if (res == SZ_OK){
         *str = zend_string_init((const char*)buf.data, buf.size + (!isDir ? -1 : 0), 0);
         if(isDir)
@@ -384,7 +335,7 @@ static void ConvertFileTimeToString(const CNtfsFileTime *nt, char *s){
     UIntToStr_2(s, sec); s[2] = 0;
 }
 
-static void GetAttribString(UInt32 wa, Bool isDir, char *s){
+/*static void GetAttribString(UInt32 wa, Bool isDir, char *s){
     #ifdef USE_WINDOWS_FILE
     s[0] = (char)(((wa & FILE_ATTRIBUTE_DIRECTORY) != 0 || isDir) ? 'D' : '.');
     s[1] = (char)(((wa & FILE_ATTRIBUTE_READONLY ) != 0) ? 'R': '.');
@@ -396,17 +347,17 @@ static void GetAttribString(UInt32 wa, Bool isDir, char *s){
     s[0] = (char)(((wa & (1 << 4)) != 0 || isDir) ? 'D' : '.');
     s[1] = 0;
     #endif
-}
+}*/
 
 /* {{{ proto resource p7zip_open(string filename)
  *  Opens a 7zip file
  */
 PHP_FUNCTION(p7zip_open){
     zend_string* filename;
-    char resolved_path[MAXPATHLEN + 1];
+    char resolvedPath[MAXPATHLEN + 1];
     p7zip_file_t* file;
     SRes res;
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &filename) == FAILURE) {
         return;
     }
     
@@ -419,11 +370,13 @@ PHP_FUNCTION(p7zip_open){
         RETURN_FALSE;
     }
     
-    if(!expand_filepath(ZSTR_VAL(filename), resolved_path)) {
+    if(!expand_filepath(ZSTR_VAL(filename), resolvedPath)) {
         RETURN_FALSE;
     }
         
     file = (p7zip_file_t*) emalloc(sizeof(p7zip_file_t));
+    
+    file->filename = estrndup(resolvedPath, strlen(resolvedPath));
     
     file->allocImp.Alloc = SzAlloc;
     file->allocImp.Free = SzFree;
@@ -431,7 +384,7 @@ PHP_FUNCTION(p7zip_open){
     file->allocTempImp.Alloc = SzAlloc;
     file->allocTempImp.Free = SzFree;
     
-    if (InFile_Open(&file->archiveStream.file, resolved_path)){
+    if (InFile_Open(&file->archiveStream.file, resolvedPath)){
         efree(file);
         RETURN_FALSE;
     }
@@ -472,6 +425,8 @@ PHP_FUNCTION(p7zip_close){
     if ((file = (p7zip_file_t*) zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
         RETURN_FALSE;
     }
+    
+    efree(file->filename);
     
     File_Close(&file->archiveStream.file);
     
@@ -536,7 +491,7 @@ PHP_FUNCTION(p7zip_list){
     p7zip_file_t* file;
     zend_bool full_info = 0;
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &full_info) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &fullInfo) == FAILURE) {
         return;
     }
 
@@ -579,7 +534,7 @@ PHP_FUNCTION(p7zip_list){
             break;
         }
         
-        if(full_info){
+        if(fullInfo){
             char t[32], crc[17];
             UInt64 fileSize;
             
@@ -642,14 +597,35 @@ PHP_FUNCTION(p7zip_list){
 PHP_FUNCTION(p7zip_extract){
     zval* val;
     p7zip_file_t* file;
-    zend_bool full_paths = 0;
+    zend_bool fullPaths = 0;
+    zend_string* directory = NULL;
+    char resolvedPath[MAXPATHLEN + 1];
     
-    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &full_paths) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|bS", &val, &fullPaths, &directory) == FAILURE) {
         return;
     }
 
     if ((file = (p7zip_file_t*) zend_fetch_resource(Z_RES_P(val), le_p7zip_name, le_p7zip)) == NULL) {
         RETURN_FALSE;
+    }
+    
+    if(directory != NULL){
+        if(php_check_open_basedir(ZSTR_VAL(directory))){
+            RETURN_FALSE;
+        }
+        
+        if(!expand_filepath(ZSTR_VAL(directory), resolvedPath)) {
+            RETURN_FALSE;
+        }
+    }
+    else{
+        char* fileDirectory = dirname(file->filename);
+        
+        if(php_check_open_basedir(fileDirectory)){
+            RETURN_FALSE;
+        }
+        
+        strncpy(resolvedPath, fileDirectory, strlen(fileDirectory));
     }
     
     UInt32 i;
@@ -687,6 +663,8 @@ PHP_FUNCTION(p7zip_extract){
                 &blockIndex, &outBuffer, &outBufferSize,
                 &offset, &outSizeProcessed,
                 &file->allocImp, &file->allocTempImp);
+            if (res != SZ_OK)
+                break;
         }
         
         CSzFile outFile;
@@ -699,7 +677,7 @@ PHP_FUNCTION(p7zip_extract){
             if (name[j] == '/'){
                 if (full_paths){
                     name[j] = 0;
-                    MyCreateDir(name);
+                    MyCreateDir(resolvedPath, name);
                     name[j] = CHAR_PATH_SEPARATOR;
                 }
                 else
@@ -707,10 +685,10 @@ PHP_FUNCTION(p7zip_extract){
             }
             
             if (isDir){
-                MyCreateDir(destPath);
+                MyCreateDir(resolvedPath, destPath);
                 continue;
             }
-            else if (OutFile_OpenUtf16(&outFile, destPath)){
+            else if (OutFile_OpenUtf16(&outFile, resolvedPath, destPath)){
                 php_error_docref(NULL, E_ERROR, "Can't open output file");
                 res = SZ_ERROR_FAIL;
                 break;
@@ -729,11 +707,6 @@ PHP_FUNCTION(p7zip_extract){
                 res = SZ_ERROR_FAIL;
                 break;
             }
-            
-            #ifdef USE_WINDOWS_FILE
-            if (SzBitWithVals_Check(&db.Attribs, i))
-                SetFileAttributesW(destPath, db.Attribs.Vals[i]);
-            #endif
         }
         
     IAlloc_Free(&file->allocImp, outBuffer);

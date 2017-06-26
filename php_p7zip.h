@@ -63,6 +63,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 typedef struct _p7zip_file_s{
+    char* filename;
     CSzArEx db;
     CFileInStream archiveStream;
     CLookToRead lookStream;
