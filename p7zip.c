@@ -489,7 +489,7 @@ PHP_FUNCTION(p7zip_test){
 PHP_FUNCTION(p7zip_list){
     zval* val;
     p7zip_file_t* file;
-    zend_bool full_info = 0;
+    zend_bool fullInfo = 0;
     
     if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &val, &fullInfo) == FAILURE) {
         return;
@@ -641,7 +641,7 @@ PHP_FUNCTION(p7zip_extract){
         size_t outSizeProcessed = 0;
         size_t len;
         unsigned isDir = SzArEx_IsDir(&file->db, i);
-        if (isDir && !full_paths)
+        if (isDir && !fullPaths)
           continue;
         len = SzArEx_GetFileNameUtf16(&file->db, i, NULL);
 
