@@ -24,7 +24,7 @@
 extern zend_module_entry p7zip_module_entry;
 #define phpext_p7zip_ptr &p7zip_module_entry
 
-#define PHP_P7ZIP_VERSION "0.1.0" /* Replace with version number for your extension */
+#define PHP_P7ZIP_VERSION "0.1.0-beta" /* Replace with version number for your extension */
 
 #ifdef PHP_WIN32
 #	define PHP_P7ZIP_API __declspec(dllexport)
