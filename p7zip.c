@@ -376,7 +376,7 @@ PHP_FUNCTION(p7zip_open){
         
     file = (p7zip_file_t*) emalloc(sizeof(p7zip_file_t));
     
-    strncpy(file->filename, resolvedPath, sizeof(resolvedPath));
+    snprintf(file->filename, strlen(resolvedPath), "%s", resolvedPath);
     
     file->allocImp.Alloc = SzAlloc;
     file->allocImp.Free = SzFree;
