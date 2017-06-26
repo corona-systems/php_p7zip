@@ -12,7 +12,7 @@ $test2 = file_get_contents(dirname(__FILE__)."/test2.text");
 echo $test1 == $test2 ? "OK\n" : "Failure";
 unlink(dirname(__FILE__)."/test.text");
 $handle = p7zip_open(dirname(__FILE__)."/test.7z");
-echo p7zip_extract($handle, FALSE, "../") ? "OK\n" : "Failure";
+echo p7zip_extract($handle, FALSE, dirname(__FILE__)."/../") ? "OK\n" : "Failure";
 p7zip_close($handle);
 $test1 = file_get_contents(dirname(__FILE__)."/../test.text");
 $test2 = file_get_contents(dirname(__FILE__)."/test2.text");
