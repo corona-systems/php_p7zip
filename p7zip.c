@@ -217,7 +217,7 @@ static WRes OutFile_OpenUtf16(CSzFile *p, const char* path, const UInt16 *name){
     Buf_Init(&buf);
     RINOK(Utf16_To_Char(&buf, name));
     char fullPath[MAXPATHLEN + 1];
-    size_t len = buf.size + strlen(path);
+    size_t len = buf.size + strlen(path) + 1;
     if(len > MAXPATHLEN)
         len = MAXPATHLEN;
     snprintf(fullPath, len, "%s%c%s", path, CHAR_PATH_SEPARATOR, (const char *)buf.data);
