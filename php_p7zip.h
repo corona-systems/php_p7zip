@@ -38,6 +38,8 @@ extern zend_module_entry p7zip_module_entry;
 #include "TSRM.h"
 #endif
 
+#include "php.h"
+
 #include "lzma-sdk/C/7z.h"
 #include "lzma-sdk/C/7zFile.h"
 
@@ -63,7 +65,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
 typedef struct _p7zip_file_s{
-    char* filename;
+    char filename[MAXPATHLEN + 1];
     CSzArEx db;
     CFileInStream archiveStream;
     CLookToRead lookStream;
