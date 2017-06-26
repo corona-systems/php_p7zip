@@ -378,6 +378,8 @@ PHP_FUNCTION(p7zip_open){
     
     snprintf(file->filename, strlen(resolvedPath) + 1, "%s", resolvedPath);
     
+    php_printf("%s", file->filename);
+    
     file->allocImp.Alloc = SzAlloc;
     file->allocImp.Free = SzFree;
 
