@@ -675,7 +675,7 @@ PHP_FUNCTION(p7zip_extract){
  
         for (j = 0; name[j] != 0; j++)
             if (name[j] == '/'){
-                if (full_paths){
+                if (fullPaths){
                     name[j] = 0;
                     MyCreateDir(resolvedPath, name);
                     name[j] = CHAR_PATH_SEPARATOR;
